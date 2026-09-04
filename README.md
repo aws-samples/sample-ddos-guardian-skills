@@ -120,7 +120,7 @@ npx skills add https://github.com/aws-samples/sample-ddos-guardian-skills.git --
 Then ask your agent for a review, pointing it at your export:
 
 ```
-Review our AWS WAF against best practices. The export is at ./webacl.json
+/ddos-guardian Review our AWS WAF rules against best practices. The export is at ./webacl.json
 ```
 
 The agent will run the assessment, ask you a short set of questions that change a verdict
