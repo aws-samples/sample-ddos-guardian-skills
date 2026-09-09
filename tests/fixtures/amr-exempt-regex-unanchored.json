@@ -1,0 +1,56 @@
+{
+  "WebACL": {
+    "Name": "amr-exempt",
+    "Id": "11111111-2222-3333-4444-555555555555",
+    "ARN": "arn:aws:wafv2:us-east-1:111122223333:global/webacl/amr-exempt/11111111-2222-3333-4444-555555555555",
+    "DefaultAction": {
+      "Allow": {}
+    },
+    "Description": "synthetic: Anti-DDoS with an unanchored exempt-URI regex",
+    "Rules": [
+      {
+        "Name": "AWS-AntiDDoS",
+        "Priority": 0,
+        "Statement": {
+          "ManagedRuleGroupStatement": {
+            "VendorName": "AWS",
+            "Name": "AWSManagedRulesAntiDDoSRuleSet",
+            "ManagedRuleGroupConfigs": [
+              {
+                "AWSManagedRulesAntiDDoSRuleSet": {
+                  "ClientSideActionConfig": {
+                    "Challenge": {
+                      "UsageOfAction": "ENABLED",
+                      "Sensitivity": "MEDIUM",
+                      "ExemptUriRegularExpressions": [
+                        {
+                          "RegexString": "\\/api\\/|\\/webhook|^\\/health$"
+                        }
+                      ]
+                    }
+                  },
+                  "SensitivityToBlock": "LOW"
+                }
+              }
+            ]
+          }
+        },
+        "OverrideAction": {
+          "None": {}
+        },
+        "VisibilityConfig": {
+          "SampledRequestsEnabled": true,
+          "CloudWatchMetricsEnabled": true,
+          "MetricName": "pre-antiddos"
+        }
+      }
+    ],
+    "VisibilityConfig": {
+      "SampledRequestsEnabled": true,
+      "CloudWatchMetricsEnabled": true,
+      "MetricName": "amr-exempt"
+    },
+    "Capacity": 50,
+    "LabelNamespace": "awswaf:111122223333:webacl:amr-exempt:"
+  }
+}

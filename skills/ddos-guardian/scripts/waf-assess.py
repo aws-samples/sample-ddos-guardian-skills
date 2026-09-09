@@ -824,8 +824,24 @@ def _stage_normalize(input_path: str, output_dir: str, context=None) -> tuple[di
     else:
         jp_prefix = "$.Rules"
 
+    # Firewall Manager places its rule groups outside `Rules`, in two sibling arrays whose
+    # entries carry `FirewallManagerStatement` instead of `Statement`. They evaluate in the
+    # same priority space as the customer's rules, so they are folded into the same list.
+    all_rules = list(web_acl.get("rules", []))
+    for fms_key in ("pre_process_firewall_manager_rule_groups",
+                    "post_process_firewall_manager_rule_groups"):
+        for grp in web_acl.get(fms_key) or []:
+            if not isinstance(grp, dict):
+                continue
+            grp = dict(grp)
+            if "statement" not in grp and "firewall_manager_statement" in grp:
+                grp["statement"] = grp.pop("firewall_manager_statement")
+            grp["_fms_source"] = fms_key
+            all_rules.append(grp)
+    all_rules.sort(key=lambda r: (r.get("priority") is None, r.get("priority", 0)))
+
     rules = [_process_rule(rule, idx, line_index, jp_prefix)
-             for idx, rule in enumerate(web_acl.get("rules", []))]
+             for idx, rule in enumerate(all_rules)]
 
     default_action = "unknown"
     da = web_acl.get("default_action", {})
@@ -886,7 +902,8 @@ def _stage_normalize(input_path: str, output_dir: str, context=None) -> tuple[di
             "token_domains": web_acl.get("token_domains", []),
             "challenge_config": challenge_config,
             "captcha_config": captcha_config,
-            "managed_by_fms": web_acl.get("managed_by_fms"),
+            "managed_by_fms": web_acl.get("managed_by_firewall_manager",
+                                          web_acl.get("managed_by_fms")),
             "shield_advanced": any(
                 "ShieldMitigationRuleGroup" in json.dumps(r.get("statement", {}))
                 for r in rules) or bool((context or {}).get("shield_advanced")),
@@ -1345,26 +1362,33 @@ def _flag_exempt_regex(rules: list) -> list:
         if not mg:
             continue
         cfg = mg.get("config") or {}
-        exempt = cfg.get("uris_exempt_from_challenge", [])
-        if not exempt:
+        # The export nests the regexes under
+        # ManagedRuleGroupConfigs[].AWSManagedRulesAntiDDoSRuleSet.ClientSideActionConfig
+        #   .Challenge.ExemptUriRegularExpressions[].RegexString
+        # which _extract_managed_config flattens to config.client_side_action_config.
+        challenge = ((cfg.get("client_side_action_config") or {}).get("challenge") or {})
+        exempt = challenge.get("exempt_uri_regular_expressions") or []
+        regexes = [e.get("regex_string") for e in exempt
+                   if isinstance(e, dict) and e.get("regex_string")]
+        if not regexes:
             continue
 
-        regex_str = exempt[0] if isinstance(exempt, list) and exempt else str(exempt)
-        branches = _split_regex_branches(regex_str)
-        branch_analysis = []
-        for b in branches:
-            b = b.strip()
-            branch_analysis.append({
-                "pattern": b,
-                "anchored_start": b.startswith("^"),
-                "anchored_end": b.endswith("$"),
+        for regex_str in regexes:
+            branches = _split_regex_branches(regex_str)
+            branch_analysis = []
+            for b in branches:
+                b = b.strip()
+                branch_analysis.append({
+                    "pattern": b,
+                    "anchored_start": b.startswith("^"),
+                    "anchored_end": b.endswith("$"),
+                })
+            flags.append({
+                "rule": r["name"],
+                "priority": r["priority"],
+                "full_regex": regex_str,
+                "branches": branch_analysis,
             })
-        flags.append({
-            "rule": r["name"],
-            "priority": r["priority"],
-            "full_regex": regex_str,
-            "branches": branch_analysis,
-        })
     return flags
 
 def _stage_pre_checks(summary: dict, output_dir: str) -> dict:
@@ -1958,7 +1982,7 @@ def _gen_challenge_all_during_event(summary, pre_checks, flags):
                    for o in overrides)
     if not disabled:
         return NOT_APPLICABLE
-    cfg = amr.get("managed", {}).get("config", {})
+    cfg = amr.get("managed", {}).get("config") or {}
     block_sens = cfg.get("sensitivity_to_block", "unknown")
     sens_map = {"LOW": ("high-suspicion", "medium and low-suspicion"),
                 "MEDIUM": ("medium and high-suspicion", "low-suspicion"),

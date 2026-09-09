@@ -1,0 +1,46 @@
+{
+  "WebACL": {
+    "Name": "amr-nocfg",
+    "Id": "11111111-2222-3333-4444-555555555555",
+    "ARN": "arn:aws:wafv2:eu-west-1:111122223333:regional/webacl/alb-acl/11111111-2222-3333-4444-555555555555",
+    "DefaultAction": {
+      "Allow": {}
+    },
+    "Description": "synthetic amr-nocfg",
+    "Rules": [
+      {
+        "Name": "AWS-AntiDDoS",
+        "Priority": 0,
+        "Statement": {
+          "ManagedRuleGroupStatement": {
+            "VendorName": "AWS",
+            "Name": "AWSManagedRulesAntiDDoSRuleSet",
+            "RuleActionOverrides": [
+              {
+                "Name": "ChallengeAllDuringEvent",
+                "ActionToUse": {
+                  "Count": {}
+                }
+              }
+            ]
+          }
+        },
+        "VisibilityConfig": {
+          "SampledRequestsEnabled": true,
+          "CloudWatchMetricsEnabled": true,
+          "MetricName": "AWS-AntiDDoS"
+        },
+        "OverrideAction": {
+          "None": {}
+        }
+      }
+    ],
+    "VisibilityConfig": {
+      "SampledRequestsEnabled": true,
+      "CloudWatchMetricsEnabled": true,
+      "MetricName": "amr-nocfg"
+    },
+    "Capacity": 1200,
+    "LabelNamespace": "awswaf:111122223333:webacl:amr-nocfg:"
+  }
+}
