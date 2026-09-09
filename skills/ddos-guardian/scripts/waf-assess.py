@@ -9,7 +9,7 @@ Usage: python3 waf-assess.py <input_path> <output_dir> [--context <context.json>
 
 Stages (all in-process, artifacts written as each completes):
   1. normalize   → waf-summary.json          (format detection, snake_case, statement summaries)
-  2. pre-checks  → pre-checks.json           (6 named checks + 3 flag extractions)
+  2. pre-checks  → pre-checks.json           (9 named checks + 3 flag extractions)
   3. findings    → scripted-findings.md      (finished Issue sections)
                    findings-metadata.json    (llm_sections, next_issue_number,
                        llm_context, context_questions)
@@ -23,6 +23,10 @@ waf-summary.json so the report can show the reader which findings rest on an ans
 somebody gave rather than on the configuration itself. Absent context is never guessed
 at: the generator either stays silent or emits the question that would settle it.
 """
+# Keeps `X | None` annotations valid on Python 3.9, which is still the system
+# interpreter on macOS. Without this the module fails to import with a TypeError.
+from __future__ import annotations
+
 import base64
 import binascii
 import json
