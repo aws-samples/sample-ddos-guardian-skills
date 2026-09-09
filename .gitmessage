@@ -1,0 +1,31 @@
+
+# <type>(<scope>): <subject>
+#
+# Subject: imperative mood, under 70 characters, no trailing period.
+#          "add crawler labelling check", not "added" or "adds".
+#
+# type   feat     a new finding, check or capability
+#        fix      corrects wrong behaviour or wrong documentation
+#        docs     README, CONTRIBUTING, references/, SKILL.md prose
+#        refactor no behaviour change
+#        test     tests and fixtures
+#        chore    housekeeping
+#        ci       workflows and checks
+#        deps     dependency changes
+#        Append ! before the colon for a breaking change: feat!: ...
+#
+# scope  ddos-guardian  the skill as a whole, SKILL.md, frontmatter
+#        scripts        waf-assess.py, waf-report.py, waf_finding_templates.py
+#        references     the reference documents
+#        readme         README.md
+#        contributing   CONTRIBUTING.md and .github/
+#        Omit the scope if the change genuinely spans everything.
+#
+# Body: wrap at 72 columns. Explain WHY this change is needed -- the diff
+# already shows what changed. Name the invariant if the change touches one
+# (standard library only / no network / never mutates AWS).
+#
+#
+# Refs: #<issue>
+#
+# Enable this template with:  git config commit.template .gitmessage
