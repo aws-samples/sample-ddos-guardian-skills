@@ -1,0 +1,71 @@
+name: Feature request — a check to add
+description: Propose a WAF misconfiguration the assessment should catch
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The most useful request is a specific misconfiguration that a reviewer would flag and this
+        skill currently misses. Describe the shape of the configuration, not a customer's copy of it.
+
+  - type: textarea
+    id: misconfiguration
+    attributes:
+      label: The misconfiguration
+      description: What is wrong with the web ACL, and what is the consequence if nobody notices?
+    validations:
+      required: true
+
+  - type: textarea
+    id: decidable
+    attributes:
+      label: How the config text alone decides it
+      description: >-
+        The scripted checks only use what is in the export. Which fields would a check read, and
+        what value makes it fire? If the answer depends on something only an operator knows
+        (client types, markets, peak request rate), say so — that becomes a context question
+        instead.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Proposed severity
+      description: See the severity table in the README.
+      options:
+        - "Critical — bypassable entirely, or a core protection disabled"
+        - "Medium — real gap needing specific conditions"
+        - "Low — no direct security impact; UX or cost only"
+        - "Awareness — not a misconfiguration, but worth knowing"
+    validations:
+      required: true
+
+  - type: input
+    id: checklist-section
+    attributes:
+      label: Checklist section
+      description: >-
+        Which of the 18 sections in `references/assessment-checklist.md` does this belong to?
+        Put "new" if none fits.
+      placeholder: e.g. 5, or new
+    validations:
+      required: false
+
+  - type: input
+    id: category
+    attributes:
+      label: Report category
+      description: >-
+        One of DDoS / Shield, Rule Logic / Bypass, Geo / IP Sets, Rate Limiting, Body Inspection,
+        Logging / Observ., Bot / Fraud.
+    validations:
+      required: false
+
+  - type: textarea
+    id: reference
+    attributes:
+      label: Supporting AWS documentation
+      description: A link to the AWS docs that establish the correct configuration.
+    validations:
+      required: false

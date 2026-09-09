@@ -1,0 +1,8 @@
+# Reviewers automatically requested on every pull request.
+# Syntax: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# TODO: confirm these handles before relying on auto-assignment. A handle that does not have
+# write access to the repository is silently ignored by GitHub, so an unverified entry looks
+# like it works while never requesting anyone.
+
+* @longwind48
