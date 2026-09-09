@@ -1,6 +1,7 @@
 """End-to-end regression tests over the exports in tests/fixtures.
 
-Each test runs the real scripts on a small synthetic `get-web-acl` export and asserts on the
+Each test runs the real scripts on a `get-web-acl` export (real exports with the account ID
+redacted, plus one synthetic Firewall Manager export) and asserts on the
 artifacts they write. Standard library only, no network, nothing outside a temp dir.
 
     python3 -m unittest discover -s tests -v
@@ -56,10 +57,23 @@ class AssessFixtures(unittest.TestCase):
         titles = [t for _, t in issue_titles(out)]
         self.assertTrue(any("ChallengeAllDuringEvent" in t for t in titles), titles)
 
+    def test_real_firewall_manager_export_sees_the_preprocess_group(self):
+        """Real FMS export: zero customer rules, CRS in PreProcessFirewallManagerRuleGroups."""
+        out = os.path.join(self.tmp, "fms-real")
+        proc = assess("fms-real-preprocess-crs.json", out)
+        self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
+        with open(os.path.join(out, "waf-summary.json"), encoding="utf-8") as fh:
+            summary = json.load(fh)
+        names = [r["name"] for r in summary["rules"]]
+        self.assertEqual(names, ["PREFMManaged-AWSManagedRulesCommonRuleSet-1730016823763"])
+        self.assertIs(summary["web_acl"]["managed_by_fms"], True)
+        titles = [t for _, t in issue_titles(out)]
+        self.assertFalse(any(t.startswith("Missing CRS") for t in titles), titles)
+
     def test_firewall_manager_rule_groups_are_assessed(self):
-        """Pre/post-process Firewall Manager groups evaluate in the same priority space."""
+        """Synthetic: pre- and post-process groups evaluate in the same priority space."""
         out = os.path.join(self.tmp, "fms")
-        proc = assess("fms-pre-post-groups.json", out)
+        proc = assess("fms-synthetic-pre-post-groups.json", out)
         self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
         with open(os.path.join(out, "waf-summary.json"), encoding="utf-8") as fh:
             summary = json.load(fh)
@@ -94,8 +108,8 @@ class ReportFixtures(unittest.TestCase):
         self.tmp = tempfile.mkdtemp(prefix="ddos-guardian-test-")
 
     def test_quotes_in_urls_cannot_break_out_of_href(self):
-        out = os.path.join(self.tmp, "fms")
-        proc = assess("fms-pre-post-groups.json", out)
+        out = os.path.join(self.tmp, "exempt")
+        proc = assess("amr-exempt-regex-unanchored.json", out)
         self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
         with open(os.path.join(FIXTURES, "xss-summary.md"), encoding="utf-8") as fh:
             summary = fh.read()
@@ -112,9 +126,28 @@ class ReportFixtures(unittest.TestCase):
         for href in re.findall(r'href="([^"]*)"', html):
             self.assertNotIn("onmouseover", href)
         self.assertNotRegex(html, r'href="[^"]*"onmouseover=')
-        self.assertNotIn("<a href=\"https://x.example/a\"onmouseover", html)
+        # No anchor may carry an event-handler attribute at all.
+        for tag in re.findall(r"<a\s[^>]*>", html):
+            self.assertNotRegex(tag, r"\son[a-z]+=", tag)
         # The legitimate part of the link still renders as a link.
         self.assertIn('<a href="https://x.example/a"', html)
+        self.assertIn('<a href="https://x.example/c"', html)
+
+    def test_not_supplied_placeholder_is_not_double_escaped(self):
+        """The Architecture card must render the placeholder, not its HTML source."""
+        out = os.path.join(self.tmp, "exempt2")
+        proc = assess("amr-exempt-regex-unanchored.json", out)
+        self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
+        with open(os.path.join(out, "scripted-findings.md"), encoding="utf-8") as fh:
+            findings = fh.read()
+        with open(os.path.join(out, "findings.md"), "w", encoding="utf-8") as fh:
+            fh.write("## @summary\n\nplaceholder\n\n" + findings)
+        html_path = os.path.join(out, "report.html")
+        proc = run(REPORT, out, "--out", html_path)
+        self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
+        with open(html_path, encoding="utf-8") as fh:
+            html = fh.read()
+        self.assertNotIn("&lt;span style=", html)
 
     def test_query_strings_in_urls_still_link(self):
         sys.path.insert(0, SCRIPTS)

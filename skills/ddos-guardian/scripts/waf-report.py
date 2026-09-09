@@ -1610,7 +1610,8 @@ def biz_context_grid(summary_json, issues):
                     + (f' · {esc(env).title()}' if env else ""),
                     (f'{len(markets)} market(s) — geo restriction is free and evaluates early'
                      if markets else "geo restriction cannot be assessed without this"))
-            + _card("Architecture", esc(arch), "; ".join(arch_sub) or unknown)
+            + _card("Architecture", unknown if arch is unknown else esc(arch),
+                    "; ".join(arch_sub) or unknown)
             + _card("DDoS Protection", esc(ddos_val), esc(ddos_sub), warn=amr_off)
             + _card("WAF Logging", log_val, esc(log_sub))
             + "</div>")

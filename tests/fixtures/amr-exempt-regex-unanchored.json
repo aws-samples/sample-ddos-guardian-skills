@@ -1,12 +1,12 @@
 {
   "WebACL": {
-    "Name": "amr-exempt",
-    "Id": "11111111-2222-3333-4444-555555555555",
-    "ARN": "arn:aws:wafv2:us-east-1:111122223333:global/webacl/amr-exempt/11111111-2222-3333-4444-555555555555",
+    "Name": "evidence-amr-exempt",
+    "Id": "493ae56f-c3ee-4237-8e24-a7b58858d90c",
+    "ARN": "arn:aws:wafv2:us-east-1:111122223333:regional/webacl/evidence-amr-exempt/493ae56f-c3ee-4237-8e24-a7b58858d90c",
     "DefaultAction": {
       "Allow": {}
     },
-    "Description": "synthetic: Anti-DDoS with an unanchored exempt-URI regex",
+    "Description": "ddos-guardian PR evidence: Anti-DDoS with unanchored exempt URI regex",
     "Rules": [
       {
         "Name": "AWS-AntiDDoS",
@@ -41,16 +41,22 @@
         "VisibilityConfig": {
           "SampledRequestsEnabled": true,
           "CloudWatchMetricsEnabled": true,
-          "MetricName": "pre-antiddos"
+          "MetricName": "AWSAntiDDoS"
         }
       }
     ],
     "VisibilityConfig": {
       "SampledRequestsEnabled": true,
       "CloudWatchMetricsEnabled": true,
-      "MetricName": "amr-exempt"
+      "MetricName": "evidenceamrexempt"
     },
     "Capacity": 50,
-    "LabelNamespace": "awswaf:111122223333:webacl:amr-exempt:"
-  }
+    "ManagedByFirewallManager": false,
+    "LabelNamespace": "awswaf:111122223333:webacl:evidence-amr-exempt:",
+    "RetrofittedByFirewallManager": false,
+    "OnSourceDDoSProtectionConfig": {
+      "ALBLowReputationMode": "ACTIVE_UNDER_DDOS"
+    }
+  },
+  "_source": "real `aws wafv2 get-web-acl` export, REGIONAL us-east-1, 2026-09-09; account ID redacted, LockToken removed"
 }
