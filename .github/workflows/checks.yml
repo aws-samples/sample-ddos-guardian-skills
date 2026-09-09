@@ -1,0 +1,76 @@
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scripts:
+    name: scripts load on Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.9 is the floor the README promises, and is still the system interpreter on
+        # macOS. Test it explicitly -- compileall alone does NOT catch version-specific
+        # runtime errors such as a PEP 604 `X | None` annotation without the __future__
+        # import, because annotations are evaluated when the `def` executes.
+        python-version: ["3.9", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compile every script
+        run: python -m compileall -q skills/ddos-guardian/scripts
+
+      - name: Both entry points load and report their usage
+        # Exit 2 is the documented "fatal, fix your input" path and proves the module
+        # fully evaluated. Exit 1 means a traceback -- the module failed to load.
+        run: |
+          set -u
+          for s in waf-assess waf-report; do
+            python "skills/ddos-guardian/scripts/$s.py" >/dev/null 2>&1 && rc=0 || rc=$?
+            if [ "$rc" -ne 2 ]; then
+              echo "::error::$s.py exited $rc with no arguments; expected 2 (usage). A 1 means it failed to load."
+              python "skills/ddos-guardian/scripts/$s.py" || true
+              exit 1
+            fi
+            echo "$s.py OK (exit 2, usage reported)"
+          done
+
+  invariants:
+    name: stdlib only, no network, never mutates AWS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          # sys.stdlib_module_names, used to detect third-party imports, needs 3.10+.
+          python-version: "3.13"
+
+      - name: Enforce invariants
+        run: python .github/scripts/check_invariants.py skills/ddos-guardian
+
+  skill:
+    name: skill validates against the Agent Skills spec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate SKILL.md frontmatter
+        # Checks the name and description length and character rules, that name matches
+        # the directory, and that no non-spec frontmatter key is present.
+        run: npx --yes skills-ref@0.1 validate skills/ddos-guardian

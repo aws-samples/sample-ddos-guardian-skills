@@ -1,0 +1,12 @@
+# Reviewers automatically requested on every pull request.
+# Syntax: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# TODO: add the skill author. The existing commits are authored by Tan Huynh
+# <hcongtan@amazon.com>, but that address is not linked to a GitHub account, so the handle
+# could not be resolved and is deliberately left out rather than guessed at.
+#
+# Note: GitHub silently ignores a code owner that does not have write access to the
+# repository. An unverified entry looks like it works while never requesting anyone, so
+# confirm each handle before relying on auto-assignment.
+
+* @longwind48

@@ -1,25 +1,21 @@
 ---
 name: ddos-guardian
 description: >-
-  Reviews an existing AWS WAF (a WAFv2 web ACL on ALB, CloudFront, API Gateway or AppSync)
-  against AWS best practices and produces a self-contained HTML report: severity-rated
-  findings, ready-to-apply remediation, cost and WCU impact. Reach for it even when the
-  user never says "WAF" — whenever they ask what is wrong with their web ACL or want one
-  reviewed or hardened; hand over a get-web-acl export or any file containing
-  WebACL/web_acl rules; report customers or a page being blocked and want the culprit rule
-  plus a safe exception; ask whether they are protected against L7 DDoS, bots, scraping,
-  scripted signups or credential stuffing, or whether rate-based rules and managed rule
+  Reviews an AWS WAFv2 web ACL (ALB, CloudFront, API Gateway, AppSync) against AWS best
+  practices, writing a self-contained HTML report: severity-rated findings, remediation, cost
+  and WCU. Use it even when nobody says "WAF": what is wrong with my web ACL, review or harden
+  it, here is a get-web-acl export or any file with WebACL/web_acl rules, customers are
+  blocked, find the culprit rule and a safe exception, am I protected against L7 DDoS, bots,
+  scraping, scripted signups or credential stuffing, do rate-based rules and managed rule
   groups (AntiDDoS, CommonRuleSet, KnownBadInputs, IP reputation, anonymous IP, BotControl,
-  ATP, ACFP) exist, run in the right order, or need scope-down statements; ask whether an
-  Allow rule can be forged, whether a Challenge is reaching clients that cannot complete
-  one, or whether search engine crawlers will be challenged during an attack; question a
-  rising WAF bill or a WCU count near its limit; need a write-up with severities for
-  compliance; ask what Shield Advanced already entitles them to; or ask about WAF logging.
-  Not for non-AWS firewalls (Cloudflare, nginx), AWS Network Firewall, security groups or
-  network ACLs, or IAM policy review — different services whose configs this cannot parse.
-permissions:
-  - file_read
-  - file_write
+  ATP, ACFP) exist and run in the right order or need scope-downs, can an Allow rule be
+  forged, does a Challenge reach clients that cannot complete one, will crawlers be challenged
+  in an attack, why is the WAF bill rising, is WCU near its limit, Shield Advanced coverage, is
+  WAF logging on. Not for non-AWS firewalls, Network Firewall, security groups or IAM policy
+  review.
+license: MIT-0
+metadata:
+  permissions: file_read,file_write
 ---
 
 # DDoS Guardian — AWS WAF rules assessment
@@ -121,7 +117,7 @@ ACL at all**. Ask for it up front; it is cheap to obtain and expensive to guess 
 `output_dir = {parent of input_file}/waf-assessments`. A relative input path makes the
 `---RESULT---` block's `OUTPUT_DIR` relative too, so any later command run from a different
 directory silently misses the artifacts. `scripts_dir` is `{skill base directory}/scripts`.
-Python 3 standard library only — no virtualenv, no install step.
+Python 3.9+ standard library only — no virtualenv, no install step.
 
 ```bash
 python3 "{scripts_dir}/waf-assess.py" "{input_file}" "{output_dir}"

@@ -1,0 +1,93 @@
+name: Bug report
+description: The assessment failed, produced a wrong finding, or the report did not render
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Do not paste an unredacted web ACL export.** A `get-web-acl` response contains account
+        IDs, ARNs, IP set contents, header and cookie names, and URI paths. Redact them, or
+        describe the rule shape in words instead.
+
+        For a security vulnerability, use the
+        [AWS vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/)
+        rather than a public issue.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: What you ran
+      description: The prompt you gave your agent, or the script command line.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: result-block
+    attributes:
+      label: The ---RESULT--- block
+      description: >-
+        `waf-assess.py` prints a `---RESULT---` block on exit. Paste it — it carries the stage that
+        failed and the rule count. Safe to share; it contains no configuration.
+      render: text
+    validations:
+      required: false
+
+  - type: dropdown
+    id: input-shape
+    attributes:
+      label: Input shape
+      description: How was the export produced?
+      options:
+        - AWS CLI output (top-level WebACL)
+        - snake_case export (top-level web_acl)
+        - bare rules array
+        - Console export
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Which phase failed
+      options:
+        - "Phase A — waf-assess.py"
+        - "Phase B — waf-report.py"
+        - The agent's own analysis or report wording
+        - Installing the skill
+    validations:
+      required: true
+
+  - type: input
+    id: runtime
+    attributes:
+      label: Agent runtime and version
+      placeholder: e.g. Claude Code 2.1.4, Kiro, Codex CLI
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      description: Output of `python3 --version`
+      placeholder: e.g. Python 3.12.4
+    validations:
+      required: true
+
+  - type: textarea
+    id: anything-else
+    attributes:
+      label: Anything else
+      description: Redacted rule fragments, screenshots of the report, or other context.
+    validations:
+      required: false
