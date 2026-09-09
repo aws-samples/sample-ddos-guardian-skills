@@ -112,7 +112,7 @@ def sev_key(raw: str) -> str:
 # ════════════════════════════════════
 
 def esc(v) -> str:
-    return html.escape(str(v if v is not None else ""), quote=False)
+    return html.escape(str(v if v is not None else ""), quote=True)
 
 
 def _inline(text: str) -> str:
@@ -121,11 +121,14 @@ def _inline(text: str) -> str:
     t = re.sub(r"`([^`]+)`", r"<code>\1</code>", t)
     t = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", t)
     t = re.sub(r"(?<![*\w])\*([^*\n]+)\*(?!\w)", r"<em>\1</em>", t)
-    t = re.sub(r"\[([^\]]+)\]\((https?://[^)\s]+)\)",
+    # URL character classes exclude quotes and angle brackets: esc() has already turned them
+    # into entities, and an entity inside href must never be able to close the attribute.
+    url = r"(?:(?!&quot;|&#x27;|&lt;|&gt;)[^)\s\"'<>])+"
+    t = re.sub(r"\[([^\]]+)\]\((https?://" + url + r")\)",
                r'<a href="\2" rel="noopener noreferrer" target="_blank">\1</a>', t)
     # Bare URLs, which the appendix uses. Done after the link form so an already-linked
     # URL is not wrapped twice.
-    t = re.sub(r'(?<!["\'>=])\b(https?://[^\s<)]+)',
+    t = re.sub(r'(?<!["\'>=])\b(https?://' + url + r')',
                r'<a href="\1" rel="noopener noreferrer" target="_blank">\1</a>', t)
     return t
 
@@ -1607,7 +1610,8 @@ def biz_context_grid(summary_json, issues):
                     + (f' · {esc(env).title()}' if env else ""),
                     (f'{len(markets)} market(s) — geo restriction is free and evaluates early'
                      if markets else "geo restriction cannot be assessed without this"))
-            + _card("Architecture", esc(arch), "; ".join(arch_sub) or unknown)
+            + _card("Architecture", unknown if arch is unknown else esc(arch),
+                    "; ".join(arch_sub) or unknown)
             + _card("DDoS Protection", esc(ddos_val), esc(ddos_sub), warn=amr_off)
             + _card("WAF Logging", log_val, esc(log_sub))
             + "</div>")

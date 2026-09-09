@@ -1,0 +1,45 @@
+{
+  "WebACL": {
+    "Name": "FMManagedWebACLV2-waf-policy-1-1730016823452",
+    "Id": "5865ef25-5ee8-4828-a127-18570cace7f7",
+    "ARN": "arn:aws:wafv2:us-east-1:111122223333:regional/webacl/FMManagedWebACLV2-waf-policy-1-1730016823452/5865ef25-5ee8-4828-a127-18570cace7f7",
+    "DefaultAction": {
+      "Allow": {}
+    },
+    "Description": "",
+    "Rules": [],
+    "VisibilityConfig": {
+      "SampledRequestsEnabled": true,
+      "CloudWatchMetricsEnabled": true,
+      "MetricName": "FMManagedWebACLV2wafpolicy11730016823452"
+    },
+    "Capacity": 700,
+    "PreProcessFirewallManagerRuleGroups": [
+      {
+        "Name": "PREFMManaged-AWSManagedRulesCommonRuleSet-1730016823763",
+        "Priority": 0,
+        "FirewallManagerStatement": {
+          "ManagedRuleGroupStatement": {
+            "VendorName": "AWS",
+            "Name": "AWSManagedRulesCommonRuleSet"
+          }
+        },
+        "OverrideAction": {
+          "None": {}
+        },
+        "VisibilityConfig": {
+          "SampledRequestsEnabled": true,
+          "CloudWatchMetricsEnabled": true,
+          "MetricName": "PREFMManaged-AWSManagedRulesCommonRuleSet-1730016823763"
+        }
+      }
+    ],
+    "ManagedByFirewallManager": true,
+    "LabelNamespace": "awswaf:111122223333:webacl:FMManagedWebACLV2-waf-policy-1-1730016823452:",
+    "RetrofittedByFirewallManager": false,
+    "OnSourceDDoSProtectionConfig": {
+      "ALBLowReputationMode": "ACTIVE_UNDER_DDOS"
+    }
+  },
+  "_source": "real `aws wafv2 get-web-acl` export, REGIONAL us-east-1, 2026-09-09; account ID redacted, LockToken removed"
+}

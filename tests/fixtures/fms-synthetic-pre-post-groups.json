@@ -1,0 +1,115 @@
+{
+  "WebACL": {
+    "Name": "FMManagedWebACLV2-policy-1",
+    "Id": "11111111-2222-3333-4444-555555555555",
+    "ARN": "arn:aws:wafv2:eu-west-1:111122223333:regional/webacl/alb-acl/11111111-2222-3333-4444-555555555555",
+    "DefaultAction": {
+      "Allow": {}
+    },
+    "Description": "synthetic FMManagedWebACLV2-policy-1",
+    "Rules": [
+      {
+        "Name": "rate-blanket",
+        "Priority": 10,
+        "Statement": {
+          "RateBasedStatement": {
+            "Limit": 2000,
+            "AggregateKeyType": "IP",
+            "EvaluationWindowSec": 300
+          }
+        },
+        "VisibilityConfig": {
+          "SampledRequestsEnabled": true,
+          "CloudWatchMetricsEnabled": true,
+          "MetricName": "rate-blanket"
+        },
+        "Action": {
+          "Block": {}
+        }
+      }
+    ],
+    "VisibilityConfig": {
+      "SampledRequestsEnabled": true,
+      "CloudWatchMetricsEnabled": true,
+      "MetricName": "FMManagedWebACLV2-policy-1"
+    },
+    "Capacity": 1900,
+    "LabelNamespace": "awswaf:111122223333:webacl:FMManagedWebACLV2-policy-1:",
+    "ManagedByFirewallManager": true,
+    "PreProcessFirewallManagerRuleGroups": [
+      {
+        "Name": "PREFMManaged-AntiDDoS",
+        "Priority": 0,
+        "FirewallManagerStatement": {
+          "ManagedRuleGroupStatement": {
+            "VendorName": "AWS",
+            "Name": "AWSManagedRulesAntiDDoSRuleSet",
+            "ManagedRuleGroupConfigs": [
+              {
+                "AWSManagedRulesAntiDDoSRuleSet": {
+                  "ClientSideActionConfig": {
+                    "Challenge": {
+                      "UsageOfAction": "ENABLED",
+                      "Sensitivity": "MEDIUM",
+                      "ExemptUriRegularExpressions": [
+                        {
+                          "RegexString": "\\/api\\/|\\/webhook|^\\/health$"
+                        }
+                      ]
+                    }
+                  },
+                  "SensitivityToBlock": "LOW"
+                }
+              }
+            ]
+          }
+        },
+        "OverrideAction": {
+          "None": {}
+        },
+        "VisibilityConfig": {
+          "SampledRequestsEnabled": true,
+          "CloudWatchMetricsEnabled": true,
+          "MetricName": "pre-antiddos"
+        }
+      },
+      {
+        "Name": "PREFMManaged-CRS",
+        "Priority": 1,
+        "FirewallManagerStatement": {
+          "ManagedRuleGroupStatement": {
+            "VendorName": "AWS",
+            "Name": "AWSManagedRulesCommonRuleSet"
+          }
+        },
+        "OverrideAction": {
+          "Count": {}
+        },
+        "VisibilityConfig": {
+          "SampledRequestsEnabled": true,
+          "CloudWatchMetricsEnabled": true,
+          "MetricName": "pre-crs"
+        }
+      }
+    ],
+    "PostProcessFirewallManagerRuleGroups": [
+      {
+        "Name": "ShieldMitigationRuleGroup_111122223333_abc_x",
+        "Priority": 10000000,
+        "FirewallManagerStatement": {
+          "RuleGroupReferenceStatement": {
+            "ARN": "arn:aws:wafv2:eu-west-1:111122223333:regional/rulegroup/ShieldMitigationRuleGroup_111122223333_abc_x/ffff"
+          }
+        },
+        "OverrideAction": {
+          "None": {}
+        },
+        "VisibilityConfig": {
+          "SampledRequestsEnabled": true,
+          "CloudWatchMetricsEnabled": true,
+          "MetricName": "shield"
+        }
+      }
+    ]
+  }
+}
