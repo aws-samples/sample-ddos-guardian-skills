@@ -8,6 +8,11 @@ change there cannot drift apart.
 **Nothing in this file is read at runtime.** It is documentation. To change the layout, change
 `summary_pane()` and update this file to match.
 
+The `CHANGE SINCE LAST ASSESSMENT` block below is a **design note, not a shipped feature**.
+`waf-report.py` accepts only `--out` and `--validate-only`; there is no `--diff` flag and
+`diff_block` is always empty. Comparing two assessments is a manual diff of their
+`waf-summary.json` files today.
+
 ```
 ┌─ BUSINESS APPLICATION CONTEXT ──────────────────────────────────────┐
 │  6 cards, 3 across:  Application │ Client & Environment │ Market    │
@@ -15,7 +20,7 @@ change there cannot drift apart.
 ├─ FINDINGS OVERVIEW ─────────────────────────────────────────────────┤
 │  5 KPI cards:  Total │ Critical │ Medium │ Low │ Awareness          │
 │  3 charts:     donut (severity) │ stacked bar (category) │ gauge    │
-├─ CHANGE SINCE LAST ASSESSMENT ─── (only when --diff was supplied) ──┤
+├─ CHANGE SINCE LAST ASSESSMENT ─── (design note, NOT IMPLEMENTED) ───┤
 ├─ HIGHLIGHT FINDINGS ────────────────────────────────────────────────┤
 │  the `## @summary` block from findings.md, rendered as markdown     │
 ├─ ALL FINDINGS ──────────────────────────────────────────────────────┤
